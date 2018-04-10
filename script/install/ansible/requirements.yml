@@ -1,0 +1,55 @@
+---
+
+# From Ansible Galaxy
+
+# Ruby
+# https://galaxy.ansible.com/geerlingguy/ruby/
+# https://github.com/geerlingguy/ansible-role-ruby
+- src: geerlingguy.ruby
+
+# NodeJS
+# Galaxy: https://galaxy.ansible.com/geerlingguy/nodejs/
+# GitHub: https://github.com/geerlingguy/ansible-role-nodejs
+- src: geerlingguy.nodejs
+
+# Git
+# Galaxy: https://galaxy.ansible.com/geerlingguy/git/
+# GitHub: https://github.com/geerlingguy/ansible-role-git
+- src: geerlingguy.git
+
+# MySQL
+# Galaxy: https://galaxy.ansible.com/mjanser/mysql/
+# GitHub: https://github.com/mjanser/ansible-role-mysql
+- src: mjanser.mysql
+
+# Config /etc/hosts
+# Galaxy: https://galaxy.ansible.com/mrlesmithjr/etc-hosts/
+# GitHub: https://github.com/mrlesmithjr/ansible-etc-hosts
+- src: mrlesmithjr.etc-hosts
+
+# RabbitMQ
+# Galaxy: https://galaxy.ansible.com/mrlesmithjr/rabbitmq/
+# GitHub: https://github.com/geerlingguy/ansible-role-rabbitmq
+- src: geerlingguy.rabbitmq
+
+# RabbitMQ Backup
+# Galaxy: https://galaxy.ansible.com/mrlesmithjr/rabbitmq/
+# GitHub: https://github.com/mrlesmithjr/ansible-rabbitmq
+# - src: mrlesmithjr.rabbitmq
+
+# Certbot (for Let's Encrypt)
+# Galaxy: https://galaxy.ansible.com/geerlingguy/certbot/
+# GitHub: https://github.com/geerlingguy/ansible-role-certbot
+- src: geerlingguy.certbot
+
+# Nginx
+# Galaxy: https://galaxy.ansible.com/geerlingguy/nginx/
+# GitHub: https://github.com/geerlingguy/ansible-role-nginx
+- src: geerlingguy.nginx
+
+
+# From Source
+
+# - src: https://github.com/username/repo.git
+  # version: 0.0.0
+  # name: username.repo

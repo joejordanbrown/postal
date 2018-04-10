@@ -1,0 +1,72 @@
+---
+- name: Postal - Install packages required to build ruby (RedHat).
+  yum: "name={{ item }} state=present"
+  with_items:
+    - wget
+    - nano
+    - mysql-devel
+  when: ansible_os_family == 'RedHat'
+
+- name: Postal - Update apt cache (Debian).
+  apt: update_cache=yes cache_valid_time=86400
+  when: ansible_os_family == 'Debian'
+
+- name: Postal - Install packages required to build ruby (Debian).
+  apt: "name={{ item }} state=present"
+  with_items:
+    - wget
+    - nano
+    - libmysqlclient-dev
+  when: ansible_os_family == 'Debian'
+
+
+- name: Postal - Create MySQL postal databse
+  mysql_db:
+    login_user: root
+    login_password: {{ mysql_root_password }}
+    name: postal
+    state: present
+    encoding: utf8
+
+- name: Postal - Set MySQL postal user privileges
+  mysql_user:
+    name: postal
+    password: {{ postal_mysql_password }}
+    priv: "postal.*:ALL/postal-%.*:ALL PRIVILEGES" # "postal.*:ALL/postal-%.*:ALL PRIVILEGES,GRANT
+    state: present
+
+
+- name: Postal - Setup Postal RabbitMQ
+  shell: |
+    add_vhost /postal
+    add_user postal {{ postal_mysql_password }}
+    set_permissions -p /postal postal ".*" ".*" ".*"
+  args:
+    executable: /usr/bin/rabbitmqctl
+
+
+- name: Postal - Setup Postal RabbitMQ
+  shell: |
+    useradd -r -m -d /opt/postal -s /bin/bash postal
+    setcap 'cap_net_bind_service=+ep' /usr/bin/ruby
+  args:
+    executable: /bin/bash
+
+
+- name: Postal - Application Setup
+  shell: |
+    sudo -i -u postal mkdir -p /opt/postal/app
+    wget https://postal.atech.media/packages/stable/latest.tgz -O - | sudo -u postal tar zxpv -C /opt/postal/app
+    ln -s /opt/postal/app/bin/postal /usr/bin/postal
+    postal bundle /opt/postal/vendor/bundle
+    postal initialize-config
+    postal initialize
+    postal start
+  args:
+    executable: /bin/bash
+
+
+- name: Postal - Generate ssl_dhparam for Nginx
+  shell: openssl dhparam 4096 -out /etc/ssl/dhparam.pem
+  args:
+    executable: /bin/bash

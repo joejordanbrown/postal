@@ -45,7 +45,7 @@
     executable: /usr/sbin/rabbitmqctl
   register: command_result
   failed_when: "'FAILED' in command_result.stderr"
-
+- debug: var=command_result.stdout_lines
 
 - name: Postal - Setup Postal RabbitMQ
   shell: |
@@ -55,7 +55,7 @@
     executable: /bin/bash
   register: command_result
   failed_when: "'FAILED' in command_result.stderr"
-
+- debug: var=command_result.stdout_lines
 
 - name: Postal - Application Setup
   shell: |
@@ -70,7 +70,7 @@
     executable: /bin/bash
   register: command_result
   failed_when: "'FAILED' in command_result.stderr"
-
+- debug: var=command_result.stdout_lines
 
 - name: Postal - Generate ssl_dhparam for Nginx
   shell: openssl dhparam -dsaparam 4096 -out /etc/ssl/dhparam.pem
@@ -78,3 +78,4 @@
     executable: /bin/bash
   register: command_result
   failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines

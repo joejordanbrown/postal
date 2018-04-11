@@ -30,12 +30,12 @@ else
     VER=$(uname -r)
 fi
 
-if [[ $OS = "CentOS Linux" ]; then
+if [[ $OS = "CentOS Linux" ]]; then
     echo $OS $VER
     sudo yum update -y
     sudo yum install epel-release -y
     sudo yum install ansible -y
-elif [[ $OS = "Ubuntu Linux" ]; then
+elif [[ $OS = "Ubuntu Linux" ]]; then
     echo $OS $VER
     sudo apt-get update
     sudo apt-get install software-properties-common

@@ -93,7 +93,7 @@
     - role: mjanser.mysql
     - role: mrlesmithjr.etc-hosts
     - role: geerlingguy.rabbitmq
-    - role: joejordanbrown.postal
+    - role: "./roles/postal"
     - role: geerlingguy.certbot
     - role: geerlingguy.nginx
   tasks:

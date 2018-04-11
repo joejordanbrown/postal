@@ -4,7 +4,6 @@
   with_items:
     - wget
     - nano
-    - nmcli
     - mysql-devel
   when: ansible_os_family == 'RedHat'
 
@@ -17,21 +16,8 @@
   with_items:
     - wget
     - nano
-    - nmcli
     - libmysqlclient-dev
   when: ansible_os_family == 'Debian'
-
-
-# Add IPs - Ethernet
-- name: nmcli add Ethernet - conn_name only & ip4 gw4
-  nmcli:
-    type: ethernet
-    conn_name: '{{ item.conn_name }}'
-    ip4: '{{ item.ip4 }}'
-    gw4: '{{ item.gw4 }}'
-    state: present
-  with_items:
-    - '{{ nmcli_ethernet }}'
 
 
 - name: Postal - Create MySQL postal databse

@@ -44,6 +44,10 @@ elif [[ $OS = "Ubuntu Linux" ]]; then
     sudo apt-get install ansible
 fi
 
+cp ./hosts /etc/ansible/hosts
+cp ./hosts ~/.ansible/hosts
+
+cp ./roles/geerlingguy.rabbitmq ~/.ansible/roles/geerlingguy.rabbitmq # Temp fix Erlang install for CentOS, will create pull request on official package.
 
 echo "Install Ansi"
 ansible-galaxy install -r requirements.yml

@@ -1,1 +1,2 @@
+[postal]
 localhost ansible_connection=local

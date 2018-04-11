@@ -102,18 +102,13 @@
 
   pre_tasks:
     - name: Setup networking (interfaces)
-        template: owner=root group=root mode=644 
-                  src=~/.ansible/templates/ifcfg-interface
-                  dest=/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
-        with_items: "{{ net_interfaces }}"
+      template: owner=root group=root mode=644 
+        src=~/.ansible/templates/ifcfg-interface
+        dest=/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
+      with_items: "{{ net_interfaces }}"
     
-    - name: Restart NetworkManager
-      shell: service NetworkManager restart
-      args:
-        executable: /bin/bash
-      register: command_result
-      failed_when: "'FAILED' in command_result.stderr"
-    - debug: var=command_result.stdout_lines
+    - name: Restart Network
+      service: name=network state=restarted
 
 
   roles:

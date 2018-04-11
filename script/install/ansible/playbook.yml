@@ -2,21 +2,34 @@
 - hosts: postal
   # connection: local
   vars:
-    # ansible_user: postal
+    # ansible_user: root
+    remote_user: root
+
+
+    nmcli_ethernet:
+      - conn_name: eth0:0
+        ifname: eth0:0
+        ip4: '54.38.209.145'
+        gw4: '54.38.209.145'
+      - conn_name: eth0:1
+        ifname: eth0:1
+        ip4: '54.38.209.146'
+        gw4: '54.38.209.146'
+
     # Ruby Configuration
     ruby_install_from_source: true
     ruby_download_url: https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.1.tar.gz
     ruby_version: 2.5.1
 
     ruby_install_gems: [
-      "bundler",
-      "procodile"
+      'bundler',
+      'procodile'
     ]
 
 
 
     # NodeJS Configuration
-    nodejs_version: "8.x"
+    nodejs_version: '8.x'
 
 
 
@@ -24,22 +37,22 @@
     mysql_vendor: mariadb # mysql or mariadb
     # mysql_upstream_version: ~ # MariaDB: 10.2, MySQL: 5.7
 
-    mysql_root_password: "My $3cr3t password"
+    mysql_root_password: 'My $3cr3t password'
 
 
 
     # /etc/hosts Configuration
     etc_hosts_add_all_hosts: true
-    etc_hosts_pri_dns_name: "example.com"
+    etc_hosts_pri_dns_name: 'example.com'
 
 
 
     # RabbitMQ Configuration
-    rabbitmq_version: "3.7.4"
+    rabbitmq_version: '3.7.4'
 
     # Postal Configuration
-    postal_hostname: "example.com"
-    postal_mysql_password: "p0stalpassw0rd"
+    postal_hostname: 'example.com'
+    postal_mysql_password: 'p0stalpassw0rd'
 
     # Certbot (for Let's Encrypt) Configuration
     certbot_admin_email: hello@example.com
@@ -47,14 +60,14 @@
     certbot_create_standalone_stop_services: []
     certbot_certs:
       - domains:
-        - "{{ postal_hostname }}"
+        - '{{ postal_hostname }}'
 
     # Nginx Configuration
     nginx_vhosts:
-      - listen: "443 ssl http2"
-        server_name: "{{ postal_hostname }}"
-        server_name_redirect: "www.{{ postal_hostname }}"
-        root: "/opt/postal/app/public"
+      - listen: '443 ssl http2'
+        server_name: '{{ postal_hostname }}'
+        server_name_redirect: 'www.{{ postal_hostname }}'
+        root: '/opt/postal/app/public'
         extra_parameters: |
           ssl_certificate /etc/letsencrypt/live/{{ postal_hostname }}/fullchain.pem;
           ssl_certificate_key /etc/letsencrypt/live/{{ postal_hostname }}/privkey.pem
@@ -79,9 +92,9 @@
               proxy_set_header X-Forwarded-Proto https;
               proxy_pass http://127.0.0.1:5000;
           }
-      - listen: "80"
-        server_name: "{{ postal_hostname }} www.{{ postal_hostname }}"
-        return: "301 https://$host$request_uri"
+      - listen: '80'
+        server_name: '{{ postal_hostname }} www.{{ postal_hostname }}'
+        return: '301 https://$host$request_uri'
 
 
 
@@ -93,7 +106,7 @@
     - role: mjanser.mysql
     - role: mrlesmithjr.etc-hosts
     - role: geerlingguy.rabbitmq
-    - role: "./roles/postal"
+    - role: './roles/postal'
     - role: geerlingguy.certbot
     - role: geerlingguy.nginx
   tasks:

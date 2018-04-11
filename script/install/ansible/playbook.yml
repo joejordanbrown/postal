@@ -1,6 +1,8 @@
 ---
 - hosts: postal
+  # connection: local
   vars:
+    # ansible_user: postal
     # Ruby Configuration
     ruby_install_from_source: true
     ruby_download_url: https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.1.tar.gz
@@ -45,7 +47,7 @@
     certbot_create_standalone_stop_services: []
     certbot_certs:
       - domains:
-          - {{ postal_hostname }}
+        - "{{ postal_hostname }}"
 
     # Nginx Configuration
     nginx_vhosts:
@@ -78,8 +80,8 @@
               proxy_pass http://127.0.0.1:5000;
           }
       - listen: "80"
-          server_name: "{{ postal_hostname }} www.{{ postal_hostname }}"
-          return: "301 https://$host$request_uri"
+        server_name: "{{ postal_hostname }} www.{{ postal_hostname }}"
+        return: "301 https://$host$request_uri"
 
 
 
@@ -90,7 +92,7 @@
     - role: geerlingguy.git
     - role: mjanser.mysql
     - role: mrlesmithjr.etc-hosts
-    - role: mrlesmithjr.rabbitmq
+    - role: geerlingguy.rabbitmq
     - role: joejordanbrown.postal
     - role: geerlingguy.certbot
     - role: geerlingguy.nginx

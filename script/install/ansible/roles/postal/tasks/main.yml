@@ -23,7 +23,7 @@
 - name: Postal - Create MySQL postal databse
   mysql_db:
     login_user: root
-    login_password: {{ mysql_root_password }}
+    login_password: "{{ mysql_root_password }}"
     name: postal
     state: present
     encoding: utf8
@@ -31,26 +31,30 @@
 - name: Postal - Set MySQL postal user privileges
   mysql_user:
     name: postal
-    password: {{ postal_mysql_password }}
+    password: "{{ postal_mysql_password }}"
     priv: "postal.*:ALL/postal-%.*:ALL PRIVILEGES" # "postal.*:ALL/postal-%.*:ALL PRIVILEGES,GRANT
     state: present
 
 
 - name: Postal - Setup Postal RabbitMQ
   shell: |
-    add_vhost /postal
-    add_user postal {{ postal_mysql_password }}
-    set_permissions -p /postal postal ".*" ".*" ".*"
+    /usr/sbin/rabbitmqctl add_vhost /postal &&
+    /usr/sbin/rabbitmqctl add_user postal "{{ postal_mysql_password }}" &&
+    /usr/sbin/rabbitmqctl set_permissions -p /postal postal ".*" ".*" ".*"
   args:
-    executable: /usr/bin/rabbitmqctl
+    executable: /usr/sbin/rabbitmqctl
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
 
 
 - name: Postal - Setup Postal RabbitMQ
   shell: |
     useradd -r -m -d /opt/postal -s /bin/bash postal
-    setcap 'cap_net_bind_service=+ep' /usr/bin/ruby
+    setcap 'cap_net_bind_service=+ep' $(which ruby) # /usr/local/bin/ruby
   args:
     executable: /bin/bash
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
 
 
 - name: Postal - Application Setup
@@ -64,9 +68,13 @@
     postal start
   args:
     executable: /bin/bash
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
 
 
 - name: Postal - Generate ssl_dhparam for Nginx
-  shell: openssl dhparam 4096 -out /etc/ssl/dhparam.pem
+  shell: openssl dhparam -dsaparam 4096 -out /etc/ssl/dhparam.pem
   args:
     executable: /bin/bash
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"

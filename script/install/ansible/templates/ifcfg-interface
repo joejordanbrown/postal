@@ -1,0 +1,6 @@
+DEVICE="{{ item.name }}"
+ONBOOT="yes"
+BOOTPROTO="static"
+IPADDR="{{ item.ip4 }}"
+NETMASK="{{ item.netmask }}"
+BROADCAST="{{ item.ip4 }}"

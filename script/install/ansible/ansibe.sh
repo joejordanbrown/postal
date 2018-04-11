@@ -47,6 +47,8 @@ fi
 cp ./hosts /etc/ansible/hosts
 cp ./hosts ~/.ansible/hosts
 
+cp ./templates/ifcfg-interface ~/.ansible/templates/ifcfg-interface
+
 cp ./roles/geerlingguy.rabbitmq ~/.ansible/roles/geerlingguy.rabbitmq # Temp fix Erlang install for CentOS, will create pull request on official package.
 
 echo "Install Ansi"

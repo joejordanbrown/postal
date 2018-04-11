@@ -6,20 +6,20 @@
     remote_user: root
 
 
-    nmcli_ethernet:
-      - conn_name: eth0:0
-        ifname: eth0:0
+    net_interfaces:
+      - name: eth0:0
         ip4: '54.38.209.145'
+        netmask: '255.255.255.255'
         gw4: '54.38.209.145'
-      - conn_name: eth0:1
-        ifname: eth0:1
+      - name: eth0:1
         ip4: '54.38.209.146'
+        netmask: '255.255.255.255'
         gw4: '54.38.209.146'
 
     # Ruby Configuration
     ruby_install_from_source: true
-    ruby_download_url: https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.1.tar.gz
-    ruby_version: 2.5.1
+    ruby_download_url: https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.7.tar.gz
+    ruby_version: 2.3.7
 
     ruby_install_gems: [
       'bundler',
@@ -101,33 +101,20 @@
 
 
   pre_tasks:
-    - name: Install packages required (RedHat).
-      yum: "name={{ item }} state=present"
-      with_items:
-        - NetworkManager
-      when: ansible_os_family == 'RedHat'
+    - name: Setup networking (interfaces)
+        template: owner=root group=root mode=644 
+                  src=~/.ansible/templates/ifcfg-interface
+                  dest=/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
+        with_items: "{{ net_interfaces }}"
+    
+    - name: Restart NetworkManager
+      shell: service NetworkManager restart
+      args:
+        executable: /bin/bash
+      register: command_result
+      failed_when: "'FAILED' in command_result.stderr"
+    - debug: var=command_result.stdout_lines
 
-    - name: Update apt cache (Debian).
-      apt: update_cache=yes cache_valid_time=86400
-      when: ansible_os_family == 'Debian'
-
-    - name: Install packages required (Debian).
-      apt: "name={{ item }} state=present"
-      with_items:
-        - network-manager
-      when: ansible_os_family == 'Debian'
-
-
-    # Add IPs - Ethernet
-    - name: nmcli add Ethernet - conn_name only & ip4 gw4
-      nmcli:
-        type: ethernet
-        conn_name: '{{ item.conn_name }}'
-        ip4: '{{ item.ip4 }}'
-        gw4: '{{ item.gw4 }}'
-        state: present
-      with_items:
-        - '{{ nmcli_ethernet }}'
 
   roles:
     - role: geerlingguy.ruby

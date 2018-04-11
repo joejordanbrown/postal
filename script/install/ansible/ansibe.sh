@@ -49,7 +49,9 @@ cp ./hosts ~/.ansible/hosts
 
 cp -r ./templates ~/.ansible/templates
 
-cp ./roles/geerlingguy.rabbitmq ~/.ansible/roles/geerlingguy.rabbitmq # Temp fix Erlang install for CentOS, will create pull request on official package.
+cp -r ./roles/geerlingguy.rabbitmq ~/.ansible/roles/geerlingguy.rabbitmq # Temp fix Erlang install for CentOS, will create pull request on official package.
+
+rm -rf ./roles/geerlingguy.rabbitmq
 
 echo "Install Ansi"
 ansible-galaxy install -r requirements.yml

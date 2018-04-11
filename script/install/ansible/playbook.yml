@@ -2,7 +2,7 @@
 - hosts: postal
   # connection: local
   vars:
-    # ansible_user: root
+    ansible_user: root
     remote_user: root
 
 

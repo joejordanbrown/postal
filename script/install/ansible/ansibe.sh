@@ -49,15 +49,6 @@ ansible-galaxy install -r requirements.yml
 cp ./hosts /etc/ansible/hosts
 cp ./hosts ~/.ansible/hosts
 
-yes | cp -rf ./templates ~/.ansible/templates
-
-yes | cp -rf ./roles/geerlingguy.rabbitmq ~/.ansible/roles/geerlingguy.rabbitmq # Temp fix Erlang install for CentOS, will create pull request on official package.
-
-rm -rf ./roles/geerlingguy.rabbitmq
-
-service firewalld stop
-systemctl disable firewalld.service
-
 echo "Install Postal"
 
 ansible-playbook playbook.yml

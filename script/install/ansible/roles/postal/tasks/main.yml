@@ -62,12 +62,14 @@
     sudo -i -u postal mkdir -p /opt/postal/app
     wget https://postal.atech.media/packages/stable/latest.tgz -O - | sudo -u postal tar zxpv -C /opt/postal/app
     ln -s /opt/postal/app/bin/postal /usr/bin/postal
-    postal bundle /opt/postal/vendor/bundle
+    /usr/bin/postal bundle /opt/postal/vendor/bundle
     postal initialize-config
     postal initialize
     postal start
   args:
     executable: /bin/bash
+  become: yes
+  become_user: "{{ ansible_user }}"
   register: command_result
   failed_when: "'FAILED' in command_result.stderr"
 - debug: var=command_result.stdout_lines

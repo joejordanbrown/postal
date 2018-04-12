@@ -59,17 +59,17 @@
 
 - name: Postal - Application Setup
   shell: |
-    sudo -i -u postal mkdir -p /opt/postal/app
-    wget https://postal.atech.media/packages/stable/latest.tgz -O - | sudo -u postal tar zxpv -C /opt/postal/app
+    mkdir -p /opt/postal/app
+    wget https://postal.atech.media/packages/stable/latest.tgz -O - | tar zxpv -C /opt/postal/app
     ln -s /opt/postal/app/bin/postal /usr/bin/postal
-    /usr/bin/postal bundle /opt/postal/vendor/bundle
-    postal initialize-config
-    postal initialize
-    postal start
+    postal /usr/bin/postal bundle /opt/postal/vendor/bundle
+    postal /usr/bin/postal initialize-config
+    postal /usr/bin/postal initialize
+    postal /usr/bin/postal start
   args:
     executable: /bin/bash
   become: yes
-  become_user: "{{ ansible_user }}"
+  become_user: postal
   register: command_result
   failed_when: "'FAILED' in command_result.stderr"
 - debug: var=command_result.stdout_lines

@@ -21,10 +21,9 @@
     ruby_download_url: https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.7.tar.gz
     ruby_version: 2.3.7
 
-    ruby_install_gems: [
-      'bundler',
-      'procodile'
-    ]
+    ruby_install_gems:
+      - bundler
+      - procodile
 
 
 

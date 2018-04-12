@@ -59,6 +59,6 @@ rm -rf ./roles/geerlingguy.rabbitmq
 service firewalld stop
 systemctl disable firewalld.service
 
-echo "Install Ansi"
+echo "Install Postal"
 ansible-galaxy install -r requirements.yml
 ansible-playbook playbook.yml

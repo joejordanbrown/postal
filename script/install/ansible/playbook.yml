@@ -70,7 +70,7 @@
   pre_tasks:
     - name: Setup networking (interfaces)
       template: owner=root group=root mode=644 
-        src=~./templates/ifcfg-interface
+        src=./templates/ifcfg-interface
         dest=/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
       with_items: "{{ net_interfaces }}"
     

@@ -94,7 +94,10 @@
 
 # Install gems
 - name: Postal - Install required gems
-  gem: {{ item }}
+  gem: 
+    name: '{{ item }}'
+    state: present
+    user_install: no
   with_items: 
     - bundler
     - procodile

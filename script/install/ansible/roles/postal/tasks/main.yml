@@ -20,6 +20,9 @@
   when: ansible_os_family == 'Debian'
 
 
+
+
+# MySQL [0]
 - name: Postal - Create MySQL postal databse
   mysql_db:
     login_user: root
@@ -28,6 +31,7 @@
     state: present
     encoding: utf8
 
+# MySQL [1-2]
 - name: Postal - Set MySQL postal user privileges
   mysql_user:
     name: postal
@@ -36,20 +40,51 @@
     state: present
 
 
-- name: Postal - Setup Postal RabbitMQ
-  shell: |
-    /usr/sbin/rabbitmqctl add_vhost /postal &&
-    /usr/sbin/rabbitmqctl add_user postal "{{ postal_mysql_password }}" &&
-    /usr/sbin/rabbitmqctl set_permissions -p /postal postal ".*" ".*" ".*"
+
+
+# RabbitMQ [0]
+- name: Postal - RabbitMQ add vhost postal
+  shell: add_vhost /postal
   args:
     executable: /usr/sbin/rabbitmqctl
   register: command_result
   failed_when: "'FAILED' in command_result.stderr"
 - debug: var=command_result.stdout_lines
 
-- name: Postal - Setup Postal RabbitMQ
+# RabbitMQ [1]
+- name: Postal - RabbitMQ add user postal
+  shell: add_user postal "{{ postal_mysql_password }}"
+  args:
+    executable: /usr/sbin/rabbitmqctl
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines
+
+# RabbitMQ [2]
+- name: Postal - RabbitMQ set permissions postal
+  shell: set_permissions -p /postal postal ".*" ".*" ".*"
+  args:
+    executable: /usr/sbin/rabbitmqctl
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines
+
+
+
+
+
+# System prep [0]
+- name: Postal - Add System User
+  shell: useradd -r -m -d /opt/postal -s /bin/bash postal
+  args:
+    executable: /bin/bash
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines
+
+# System prep [1]
+- name: Postal - Allow ruby privileged ports without root
   shell: |
-    useradd -r -m -d /opt/postal -s /bin/bash postal
     setcap 'cap_net_bind_service=+ep' $(which ruby) # /usr/local/bin/ruby
   args:
     executable: /bin/bash
@@ -57,15 +92,22 @@
   failed_when: "'FAILED' in command_result.stderr"
 - debug: var=command_result.stdout_lines
 
-- name: Postal - Application Setup
-  shell: |
-    mkdir -p /opt/postal/app
-    wget https://postal.atech.media/packages/stable/latest.tgz -O - | tar zxpv -C /opt/postal/app
-    ln -s /opt/postal/app/bin/postal /usr/bin/postal
-    postal /usr/bin/postal bundle /opt/postal/vendor/bundle
-    postal /usr/bin/postal initialize-config
-    postal /usr/bin/postal initialize
-    postal /usr/bin/postal start
+
+
+
+# Application Setup [0]
+- name: Postal - Create App Directory
+  file:
+      path: /opt/postal/app
+      state: directory
+      owner: www-data
+      group: www-data
+      mode: 0775
+      recurse: yes
+
+# Application Setup [1]
+- name: Postal - Download App
+  shell: wget https://postal.atech.media/packages/stable/latest.tgz -O - --no-check-certificate | tar zxpv -C /opt/postal/app
   args:
     executable: /bin/bash
   become: yes
@@ -73,6 +115,64 @@
   register: command_result
   failed_when: "'FAILED' in command_result.stderr"
 - debug: var=command_result.stdout_lines
+
+# Application Setup [2]
+- name: Postal - Hard Link Postal
+  shell: ln -s /opt/postal/app/bin/postal /usr/bin/postal
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: postal
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines
+
+# Application Setup [3]
+- name: Postal - Bundle
+  shell: bundle /opt/postal/vendor/bundle
+  args:
+    executable: /usr/bin/postal
+  become: yes
+  become_user: postal
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines
+
+# Application Setup [4]
+- name: Postal - Initialize Config
+  shell: initialize-config
+  args:
+    executable: /usr/bin/postal
+  become: yes
+  become_user: postal
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines
+
+# Application Setup [5]
+- name: Postal - Initialize
+  shell: initialize
+  args:
+    executable: /usr/bin/postal
+  become: yes
+  become_user: postal
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines
+
+# Application Setup [6]
+- name: Postal - Start
+  shell: start
+  args:
+    executable: /usr/bin/postal
+  become: yes
+  become_user: postal
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+- debug: var=command_result.stdout_lines
+
+
+
 
 - name: Postal - Generate ssl_dhparam for Nginx
   shell: openssl dhparam -dsaparam 4096 -out /etc/ssl/dhparam.pem

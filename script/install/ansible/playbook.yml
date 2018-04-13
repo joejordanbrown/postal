@@ -67,17 +67,18 @@
     # Nginx Configuration
 
     install: 
-      - ruby: yes
-      - nodejs: yes
-      - git: yes
-      - mysql: yes
-      - etc-hosts: yes
-      - rabbitmq: yes
-      - certbot: yes
-      - nginx: yes
-    
+      ruby: yes
+      nodejs: yes
+      git: yes
+      mysql: yes
+      etcHosts: yes
+      rabbitmq: yes
+      postal: yes
+      certbot: yes
+      nginx: yes
+
     options: 
-      - firewalld
+      firewalld:
         enabled: yes # Disable firewalld
         open_ports: 
           - 4369/tcp
@@ -108,34 +109,35 @@
         name: firewalld
         state: stopped
         enabled: no
-      when: option.firewalld.enabled == 'no'
+      when: options.firewalld.enabled == no
 
 
     - name: Start and Enable service firewalld, if disabled
       service:
         name: firewalld
         state: started
-        enabled: no
-      when: option.firewalld.enabled == 'yes'
+        enabled: yes
+      when: options.firewalld.enabled == 'yes'
+
+    - firewalld:
+        service: http
+        permanent: true
+        state: enabled
+      when: options.firewalld.enabled == 'yes'
 
     - firewalld:
         service: https
         permanent: true
         state: enabled
-      when: option.firewalld.enabled == 'yes'
+      when: options.firewalld.enabled == 'yes'
 
     - firewalld:
-        service: https
+        port: '{{ item }}'
         permanent: true
         state: enabled
-      when: option.firewalld.enabled == 'yes'
-
-    - firewalld:
-        port: 161-162/udp
-        permanent: true
-        state: enabled
-      with_items: '{{ options.firewald.open_ports }}'
-      when: option.firewalld.enabled == 'yes'
+      with_items: '{{ options.firewalld.open_ports }}'
+      notify: restart_firewalld
+      when: options.firewalld.enabled == 'yes'
 
   roles:
     - role: geerlingguy.ruby
@@ -151,13 +153,14 @@
       when: install.mysql == 'yes'
 
     - role: mrlesmithjr.etc-hosts
-      when: install.etc-hosts == 'yes'
+      when: install.etcHosts == 'yes'
 
     # - role: geerlingguy.rabbitmq
     - role: './roles/geerlingguy.rabbitmq'
       when: install.rabbitmq == 'yes'
 
     - role: './roles/postal'
+      when: install.postal == 'yes'
 
     - role: geerlingguy.certbot
       when: install.certbot == 'yes'
@@ -173,9 +176,5 @@
         dest: /etc/nginx/conf.d/{{ postal_hostname }}.conf
         owner: root
         group: root
-        mode: 644 
-
-    - name: Restart Nginx
-      service:
-        name: nginx
-        state: restarted
+        mode: 644
+      notify: restart_ngix

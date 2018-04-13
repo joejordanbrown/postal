@@ -1,0 +1,16 @@
+---
+# handlers file for joejordanbrown.postal
+
+- name: restart_ngix
+  become: true
+  service:
+    name: nginx
+    state: restarted
+
+- name: restart_firewalld
+  become: true
+  service:
+    name: firewalld
+    state: restarted
+
+    

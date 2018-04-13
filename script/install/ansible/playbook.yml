@@ -66,13 +66,37 @@
 
     # Nginx Configuration
 
+    install: 
+      - ruby: yes
+      - nodejs: yes
+      - git: yes
+      - mysql: yes
+      - etc-hosts: yes
+      - rabbitmq: yes
+      - certbot: yes
+      - nginx: yes
+    
+    options: 
+      - firewalld
+        enabled: yes # Disable firewalld
+        open_ports: 
+          - 4369/tcp
+          - 25672/tcp
+          - 5671-5672/tcp
+          - 15672/tcp
+          - 61613-61614/tcp
+          - 1883/tcp
+          - 8883/tcp
 
   pre_tasks:
     - name: Setup networking (interfaces)
-      template: owner=root group=root mode=644 
-        src=./templates/ifcfg-interface
-        dest=/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
-      with_items: "{{ net_interfaces }}"
+      template:
+        src: ./templates/ifcfg-interface
+        dest: /etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
+        owner: root
+        group: root
+        mode: 644
+      with_items: '{{ net_interfaces }}'
     
     - name: Restart Network
       service: 
@@ -84,25 +108,72 @@
         name: firewalld
         state: stopped
         enabled: no
+      when: option.firewalld.enabled == 'no'
 
+
+    - name: Start and Enable service firewalld, if disabled
+      service:
+        name: firewalld
+        state: started
+        enabled: no
+      when: option.firewalld.enabled == 'yes'
+
+    - firewalld:
+        service: https
+        permanent: true
+        state: enabled
+      when: option.firewalld.enabled == 'yes'
+
+    - firewalld:
+        service: https
+        permanent: true
+        state: enabled
+      when: option.firewalld.enabled == 'yes'
+
+    - firewalld:
+        port: 161-162/udp
+        permanent: true
+        state: enabled
+      with_items: '{{ options.firewald.open_ports }}'
+      when: option.firewalld.enabled == 'yes'
 
   roles:
     - role: geerlingguy.ruby
+      when: install.ruby == 'yes'
+
     - role: geerlingguy.nodejs
+      when: install.nodejs == 'yes'
+
     - role: geerlingguy.git
+      when: install.git == 'yes'
+
     - role: mjanser.mysql
+      when: install.mysql == 'yes'
+
     - role: mrlesmithjr.etc-hosts
+      when: install.etc-hosts == 'yes'
+
     # - role: geerlingguy.rabbitmq
     - role: './roles/geerlingguy.rabbitmq'
+      when: install.rabbitmq == 'yes'
+
     - role: './roles/postal'
+
     - role: geerlingguy.certbot
+      when: install.certbot == 'yes'
+
     - role: geerlingguy.nginx
+      when: install.nginx == 'yes'
+
 
   post_tasks:
     - name: Install Postal Nginx config
-      template: owner=root group=root mode=644 
-        src=./templates/nginx.cfg
-        dest=/etc/nginx/conf.d/{{ postal_hostname }}.conf
+      template:
+        src: ./templates/nginx.cfg
+        dest: /etc/nginx/conf.d/{{ postal_hostname }}.conf
+        owner: root
+        group: root
+        mode: 644 
 
     - name: Restart Nginx
       service:

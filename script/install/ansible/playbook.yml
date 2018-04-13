@@ -27,7 +27,18 @@
     postal_mysql_password: 'p0stalpassw0rd'
 
 
-    enabled_roles:
+    # Enabled roles
+    role_pre_enabled: false
+    role_ruby_enabled: false
+    role_nodejs_enabled: false
+    role_git_enabled: false
+    role_mysql_enabled: false
+    role_etcHosts_enabled: false
+    role_rabbitmq_enabled: false
+    role_postal_enabled: false
+    role_certbot_enabled: false
+    role_nginx_enabled: false
+    role_post_enabled: false
 
 
   handlers:
@@ -35,34 +46,34 @@
 
   roles:
     - role: './roles/pre'
-      when: enabled_roles.pre == true
+      when: role_pre_enabled == true
 
     - role: geerlingguy.ruby
-      when: enabled_roles.ruby == true
+      when: role_ruby_enabled == true
 
     - role: geerlingguy.nodejs
-      when: enabled_roles.nodejs == true
+      when: role_nodejs_enabled == true
 
     - role: geerlingguy.git
-      when: enabled_roles.git == true
+      when: role_git_enabled == true
 
     - role: mjanser.mysql
-      when: enabled_roles.mysql == true
+      when: role_mysql_enabled == true
 
     - role: mrlesmithjr.etc-hosts
-      when: enabled_roles.etcHosts == true
+      when: role_etcHosts_enabled == true
 
     - role: './roles/geerlingguy.rabbitmq' # Patch package geerlingguy.rabbitmq
-      when: enabled_roles.rabbitmq == true
+      when: role_rabbitmq_enabled == true
 
     - role: './roles/postal'
-      when: enabled_roles.postal == true
+      when: role_postal_enabled == true
 
     - role: geerlingguy.certbot
-      when: enabled_roles.certbot == true
+      when: role_certbot_enabled == true
 
     - role: geerlingguy.nginx
-      when: enabled_roles.nginx == true
+      when: role_nginx_enabled == true
 
     - role: './roles/post'
-      when: enabled_roles.post == true
+      when: role_post_enabled == true

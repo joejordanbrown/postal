@@ -53,21 +53,17 @@ certbot_certs:
 # Nginx Configuration
 
 # Enabled roles
-enabled_roles: 
-  pre: true
-  ruby: true
-  nodejs: true
-  git: true
-  mysql: true
-  etcHosts: true
-  rabbitmq: true
-  postal: true
-  certbot: true
-  nginx: true
-  pre: true
-
-
-
+role_pre_enabled: true
+role_ruby_enabled: true
+role_nodejs_enabled: true
+role_git_enabled: true
+role_mysql_enabled: true
+role_etcHosts_enabled: true
+role_rabbitmq_enabled: true
+role_postal_enabled: true
+role_certbot_enabled: true
+role_nginx_enabled: true
+role_post_enabled: true
 
 options: 
   firewalld:

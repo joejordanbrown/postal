@@ -84,8 +84,7 @@
 
 # System prep [1]
 - name: Postal - Allow ruby privileged ports without root
-  shell: |
-    setcap 'cap_net_bind_service=+ep' $(which ruby) # /usr/local/bin/ruby
+  shell: setcap 'cap_net_bind_service=+ep' $(which ruby) # /usr/local/bin/ruby
   args:
     executable: /bin/bash
   register: command_result
@@ -93,6 +92,12 @@
 - debug: var=command_result.stdout_lines
 
 
+# Install gems
+- name: Postal - Install required gems
+  gem: {{ item }}
+  with_items: 
+    - bundler
+    - procodile
 
 
 # Application Setup [0]

@@ -7,7 +7,7 @@
     name: nginx
     state: restarted
 
-- name: Restart Firewalld
+- name: Restart FirewallD
   become: true
   service:
     name: firewalld
@@ -18,5 +18,3 @@
   service: 
     name: network
     state: restarted
-
-    

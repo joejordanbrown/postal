@@ -5,7 +5,6 @@
     ansible_user: root
     remote_user: root
 
-
     net_interfaces:
       - name: eth0:0
         ip4: '54.38.209.145'
@@ -16,164 +15,54 @@
         netmask: '255.255.255.255'
         gw4: '54.38.209.146'
 
-    # Ruby Configuration
-    ruby_install_from_source: true
-    ruby_download_url: https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.7.tar.gz
-    ruby_version: 2.3.7
-
-    ruby_install_gems:
-      - bundler
-      - procodile
-
-
-
-    # NodeJS Configuration
-    nodejs_version: '8.x'
-
-
-
-    # MySQL Configuration
-    mysql_vendor: mariadb # mysql or mariadb
-    # mysql_upstream_version: ~ # MariaDB: 10.2, MySQL: 5.7
-
     mysql_root_password: 'My $3cr3t password'
-
-
 
     # /etc/hosts Configuration
     etc_hosts_add_all_hosts: true
     etc_hosts_pri_dns_name: 'example.com'
 
 
-
-    # RabbitMQ Configuration
-    erlang_install_from_rabbitmq: true
-    erlang_version: '19.3.6.8'
-
-    rabbitmq_version: '3.7.4'
-
     # Postal Configuration
     postal_hostname: 'example.com'
     postal_mysql_password: 'p0stalpassw0rd'
 
-    # Certbot (for Let's Encrypt) Configuration
-    certbot_admin_email: hello@example.com
-    certbot_create_if_missing: yes
-    certbot_create_standalone_stop_services: []
-    certbot_certs:
-      - domains:
-        - '{{ postal_hostname }}'
 
-    # Nginx Configuration
+    enabled_roles:
 
-    install: 
-      ruby: true
-      nodejs: true
-      git: true
-      mysql: true
-      etcHosts: true
-      rabbitmq: true
-      postal: true
-      certbot: true
-      nginx: true
 
-    options: 
-      firewalld:
-        enabled: true # Disable firewalld
-        open_ports: 
-          - 4369/tcp
-          - 25672/tcp
-          - 5671-5672/tcp
-          - 15672/tcp
-          - 61613-61614/tcp
-          - 1883/tcp
-          - 8883/tcp
-
-  pre_tasks:
-    - name: Setup networking (interfaces)
-      template:
-        src: ./templates/ifcfg-interface
-        dest: /etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
-        owner: root
-        group: root
-        mode: 644
-      notify: Restart Network
-      with_items: '{{ net_interfaces }}'
-
-    - name: Stop and Disable service firewalld, if running
-      service:
-        name: firewalld
-        state: stopped
-        enabled: no
-      when: options.firewalld.enabled == false
-
-    - name: Start and Enable service firewalld, if disabled
-      service:
-        name: firewalld
-        state: started
-        enabled: yes
-      when: options.firewalld.enabled == true
-
-    - name: Add HTTP rule to firewalld
-      firewalld:
-        service: http
-        permanent: true
-        state: enabled
-      when: options.firewalld.enabled == true
-
-    - name: Add HTTPS rule to firewalld
-      firewalld:
-        service: https
-        permanent: true
-        state: enabled
-      when: options.firewalld.enabled == true
-
-    - name: Open Ports in firewalld
-      firewalld:
-        port: '{{ item }}'
-        permanent: true
-        state: enabled
-      with_items: '{{ options.firewalld.open_ports }}'
-      notify: Restart Firewalld
-      when: options.firewalld.enabled == true
+  handlers:
+    - include: handlers/main.yml
 
   roles:
+    - role: './roles/pre'
+      when: enabled_roles.pre == true
+
     - role: geerlingguy.ruby
-      when: install.ruby == true
+      when: enabled_roles.ruby == true
 
     - role: geerlingguy.nodejs
-      when: install.nodejs == true
+      when: enabled_roles.nodejs == true
 
     - role: geerlingguy.git
-      when: install.git == true
+      when: enabled_roles.git == true
 
     - role: mjanser.mysql
-      when: install.mysql == true
+      when: enabled_roles.mysql == true
 
     - role: mrlesmithjr.etc-hosts
-      when: install.etcHosts == true
+      when: enabled_roles.etcHosts == true
 
-    # - role: geerlingguy.rabbitmq
-    - role: './roles/geerlingguy.rabbitmq'
-      when: install.rabbitmq == true
+    - role: './roles/geerlingguy.rabbitmq' # Patch package geerlingguy.rabbitmq
+      when: enabled_roles.rabbitmq == true
 
     - role: './roles/postal'
-      when: install.postal == true
+      when: enabled_roles.postal == true
 
     - role: geerlingguy.certbot
-      when: install.certbot == true
+      when: enabled_roles.certbot == true
 
     - role: geerlingguy.nginx
-      when: install.nginx == true
+      when: enabled_roles.nginx == true
 
-
-  post_tasks:
-    - name: Install Postal Nginx config
-      template:
-        src: ./templates/nginx.cfg
-        dest: /etc/nginx/conf.d/{{ postal_hostname }}.conf
-        owner: root
-        group: root
-        mode: 644
-      notify: Restart Nginx
-      when: install.nginx == true
+    - role: './roles/post'
+      when: enabled_roles.post == true

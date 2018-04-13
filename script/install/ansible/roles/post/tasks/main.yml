@@ -1,0 +1,11 @@
+---
+
+- name: Install Postal Nginx config
+  template:
+    src: ./templates/nginx.cfg
+    dest: /etc/nginx/conf.d/{{ postal_hostname }}.conf
+    owner: root
+    group: root
+    mode: 644
+  notify: Restart Nginx
+  when: install.nginx == true

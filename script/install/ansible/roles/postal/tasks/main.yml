@@ -98,66 +98,36 @@
 # Application Setup [0]
 - name: Postal - Create App Directory
   file:
-      path: /opt/postal/app
-      state: directory
-      owner: postal
-      group: postal
-      mode: 0775
-      recurse: yes
-    become: yes
-    become_user: postal
-    register: command_result
-    failed_when: "'FAILED' in command_result.stderr"
-  - debug: var=command_result.stdout_lines
-
-# Application Setup [1]
-# - name: Postal - Download Latest App
-    # get_url: 
-      # url: https://postal.atech.media/packages/stable/latest.tgz
-      # dest: /tmp
-    # become: yes
-    # become_user: postal
-    # register: command_result
-    # failed_when: "'FAILED' in command_result.stderr"
-  # - debug: var=command_result.stdout_lines
-
-# - name: Extract archive
-  # unarchive: 
-    # src: /tmp/latest.tgz
-    # dest: /opt/postal/app
-    # remote_src: yes
-    # become_user: postal
-    # register: command_result
-    # failed_when: "'FAILED' in command_result.stderr"
-  # - debug: var=command_result.stdout_lines
+    path: /opt/postal/app
+    state: directory
+    owner: postal
+    group: postal
+    mode: 0775
+    recurse: yes
+  become: yes
+  become_user: postal
 
 - name: Postal - Download Latest Package and Extract
   unarchive: 
     src: https://postal.atech.media/packages/stable/latest.tgz
     dest: /opt/postal/app
     remote_src: yes
-    become_user: postal
-    register: command_result
-    failed_when: "'FAILED' in command_result.stderr"
-  - debug: var=command_result.stdout_lines
+    validate_certs: no # Not ideal but currently has no valid SSL.
+  become: yes
+  become_user: postal
 
 # Application Setup [2]
 - name: Postal - Hard Link Postal
   file:
     src: /opt/postal/app/bin/postal
     dest: /usr/bin/postal
-  state: link
-  become: yes
-  become_user: postal
-  register: command_result
-  failed_when: "'FAILED' in command_result.stderr"
-- debug: var=command_result.stdout_lines
+    state: link
 
 # Application Setup [3]
 - name: Postal - Bundle
-  shell: bundle /opt/postal/vendor/bundle
+  shell: /usr/bin/postal bundle /opt/postal/vendor/bundle
   args:
-    executable: /usr/bin/postal
+    executable: /bin/bash
   become: yes
   become_user: postal
   register: command_result
@@ -166,9 +136,9 @@
 
 # Application Setup [4]
 - name: Postal - Initialize Config
-  shell: initialize-config
+  shell: /usr/bin/postal initialize-config
   args:
-    executable: /usr/bin/postal
+    executable: /bin/bash
   become: yes
   become_user: postal
   register: command_result
@@ -177,9 +147,9 @@
 
 # Application Setup [5]
 - name: Postal - Initialize
-  shell: initialize
+  shell: /usr/bin/postal initialize
   args:
-    executable: /usr/bin/postal
+    executable: /bin/bash
   become: yes
   become_user: postal
   register: command_result
@@ -188,9 +158,9 @@
 
 # Application Setup [6]
 - name: Postal - Start
-  shell: start
+  shell: /usr/bin/postal start
   args:
-    executable: /usr/bin/postal
+    executable: /bin/bash
   become: yes
   become_user: postal
   register: command_result

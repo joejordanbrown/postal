@@ -67,19 +67,19 @@
     # Nginx Configuration
 
     install: 
-      ruby: yes
-      nodejs: yes
-      git: yes
-      mysql: yes
-      etcHosts: yes
-      rabbitmq: yes
-      postal: yes
-      certbot: yes
-      nginx: yes
+      ruby: true
+      nodejs: true
+      git: true
+      mysql: true
+      etcHosts: true
+      rabbitmq: true
+      postal: true
+      certbot: true
+      nginx: true
 
     options: 
       firewalld:
-        enabled: yes # Disable firewalld
+        enabled: true # Disable firewalld
         open_ports: 
           - 4369/tcp
           - 25672/tcp
@@ -97,76 +97,74 @@
         owner: root
         group: root
         mode: 644
+      notify: Restart Network
       with_items: '{{ net_interfaces }}'
-    
-    - name: Restart Network
-      service: 
-        name: network
-        state: restarted
 
     - name: Stop and Disable service firewalld, if running
       service:
         name: firewalld
         state: stopped
         enabled: no
-      when: options.firewalld.enabled == no
-
+      when: options.firewalld.enabled == false
 
     - name: Start and Enable service firewalld, if disabled
       service:
         name: firewalld
         state: started
         enabled: yes
-      when: options.firewalld.enabled == 'yes'
+      when: options.firewalld.enabled == true
 
-    - firewalld:
+    - name: Add HTTP rule to firewalld
+      firewalld:
         service: http
         permanent: true
         state: enabled
-      when: options.firewalld.enabled == 'yes'
+      when: options.firewalld.enabled == true
 
-    - firewalld:
+    - name: Add HTTPS rule to firewalld
+      firewalld:
         service: https
         permanent: true
         state: enabled
-      when: options.firewalld.enabled == 'yes'
+      when: options.firewalld.enabled == true
 
-    - firewalld:
+    - name: Open Ports in firewalld
+      firewalld:
         port: '{{ item }}'
         permanent: true
         state: enabled
       with_items: '{{ options.firewalld.open_ports }}'
-      notify: restart_firewalld
-      when: options.firewalld.enabled == 'yes'
+      notify: Restart Firewalld
+      when: options.firewalld.enabled == true
 
   roles:
     - role: geerlingguy.ruby
-      when: install.ruby == 'yes'
+      when: install.ruby == true
 
     - role: geerlingguy.nodejs
-      when: install.nodejs == 'yes'
+      when: install.nodejs == true
 
     - role: geerlingguy.git
-      when: install.git == 'yes'
+      when: install.git == true
 
     - role: mjanser.mysql
-      when: install.mysql == 'yes'
+      when: install.mysql == true
 
     - role: mrlesmithjr.etc-hosts
-      when: install.etcHosts == 'yes'
+      when: install.etcHosts == true
 
     # - role: geerlingguy.rabbitmq
     - role: './roles/geerlingguy.rabbitmq'
-      when: install.rabbitmq == 'yes'
+      when: install.rabbitmq == true
 
     - role: './roles/postal'
-      when: install.postal == 'yes'
+      when: install.postal == true
 
     - role: geerlingguy.certbot
-      when: install.certbot == 'yes'
+      when: install.certbot == true
 
     - role: geerlingguy.nginx
-      when: install.nginx == 'yes'
+      when: install.nginx == true
 
 
   post_tasks:
@@ -177,4 +175,5 @@
         owner: root
         group: root
         mode: 644
-      notify: restart_ngix
+      notify: Restart Nginx
+      when: install.nginx == true

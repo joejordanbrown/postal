@@ -100,27 +100,53 @@
   file:
       path: /opt/postal/app
       state: directory
-      owner: www-data
-      group: www-data
+      owner: postal
+      group: postal
       mode: 0775
       recurse: yes
+    become: yes
+    become_user: postal
+    register: command_result
+    failed_when: "'FAILED' in command_result.stderr"
+  - debug: var=command_result.stdout_lines
 
 # Application Setup [1]
-- name: Postal - Download App
-  shell: wget https://postal.atech.media/packages/stable/latest.tgz -O - --no-check-certificate | tar zxpv -C /opt/postal/app
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: postal
-  register: command_result
-  failed_when: "'FAILED' in command_result.stderr"
-- debug: var=command_result.stdout_lines
+# - name: Postal - Download Latest App
+    # get_url: 
+      # url: https://postal.atech.media/packages/stable/latest.tgz
+      # dest: /tmp
+    # become: yes
+    # become_user: postal
+    # register: command_result
+    # failed_when: "'FAILED' in command_result.stderr"
+  # - debug: var=command_result.stdout_lines
+
+# - name: Extract archive
+  # unarchive: 
+    # src: /tmp/latest.tgz
+    # dest: /opt/postal/app
+    # remote_src: yes
+    # become_user: postal
+    # register: command_result
+    # failed_when: "'FAILED' in command_result.stderr"
+  # - debug: var=command_result.stdout_lines
+
+- name: Postal - Download Latest Package and Extract
+  unarchive: 
+    src: https://postal.atech.media/packages/stable/latest.tgz
+    dest: /opt/postal/app
+    remote_src: yes
+    become_user: postal
+    register: command_result
+    failed_when: "'FAILED' in command_result.stderr"
+  - debug: var=command_result.stdout_lines
 
 # Application Setup [2]
 - name: Postal - Hard Link Postal
-  shell: ln -s /opt/postal/app/bin/postal /usr/bin/postal
-  args:
-    executable: /bin/bash
+  file:
+    src: /opt/postal/app/bin/postal
+    dest: /usr/bin/postal
+  state: link
   become: yes
   become_user: postal
   register: command_result
